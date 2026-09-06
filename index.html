@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#07111f" />
     <meta
       name="description"
-      content="搜索全球主要城市，一键复制纬度和经度。"
+      content="搜索全球主要城市的公开住宿落点、地址与邮编，一键复制坐标并查看 iPhone 模拟定位流程。"
     />
     <title>全球城市经纬度</title>
     <link rel="stylesheet" href="./style.css" />
@@ -19,7 +19,7 @@
       <header class="hero">
         <div class="eyebrow">CITY COORDINATES</div>
         <h1>全球城市经纬度</h1>
-        <p>搜索城市，点一下即可复制 <span>纬度, 经度</span></p>
+        <p>搜索城市，查看公开住宿落点、地址与邮编，一键复制 <span>纬度, 经度</span></p>
 
         <div class="search-wrap">
           <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
             type="search"
             inputmode="search"
             autocomplete="off"
-            placeholder="搜索城市、国家或英文名…"
+            placeholder="搜索城市、国家、住宿名称、地址或邮编…"
             aria-label="搜索城市"
           />
           <kbd>⌘ K</kbd>
@@ -39,8 +39,31 @@
         <div id="regions" class="regions" aria-label="地区筛选"></div>
       </header>
 
+      <section class="how-to" aria-labelledby="how-to-title">
+        <div class="how-to-heading">
+          <div>
+            <div class="section-kicker">HOW TO USE</div>
+            <h2 id="how-to-title">在 iPhone 上定位</h2>
+          </div>
+          <a class="primary-link" href="https://ios-location-spoofer-web-aop.pages.dev/" target="_blank" rel="noopener noreferrer">
+            打开定位控制面板 <span>↗</span>
+          </a>
+        </div>
+
+        <ol class="steps">
+          <li><span>1</span><div><strong>复制坐标</strong><p>搜索城市，点击卡片中的“复制坐标”。</p></div></li>
+          <li><span>2</span><div><strong>粘贴并锁定</strong><p>打开控制面板，把坐标粘贴到顶部搜索框，确认地图落点后点击“锁定”。</p></div></li>
+          <li><span>3</span><div><strong>刷新定位服务</strong><p>前往“设置 → 隐私与安全 → 定位服务”，关闭 10 秒后重新开启。</p></div></li>
+          <li><span>4</span><div><strong>在应用中验证</strong><p>保持 Shadowrocket 已连接、模块开启且模式为“配置”，再重新打开需要测试的应用。</p></div></li>
+        </ol>
+
+        <div class="notice">
+          <strong>使用边界：</strong>仅用于开发测试和你有权操作的场景。所有条目均为公开住宿设施，不是私人住宅；GPS 只能定位到建筑附近，无法识别楼层或房间。
+        </div>
+      </section>
+
       <section class="toolbar">
-        <div><strong id="result-count">0</strong> 个城市</div>
+        <div><strong id="result-count">0</strong> 个公开落点</div>
         <button id="copy-format" class="ghost-button" type="button" title="切换复制格式">
           格式：纬度, 经度
         </button>
@@ -55,14 +78,19 @@
       </section>
 
       <footer>
-        <p>坐标取城市中心点附近，适合快速测试与定位工具。</p>
-        <a href="https://ios-location-spoofer-web-aop.pages.dev/" target="_blank" rel="noopener noreferrer">
-          打开定位控制面板 <span>↗</span>
+        <p>
+          地址与坐标来自
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>；
+          数据可能变化，使用前请点“查看来源”复核。
+        </p>
+        <a href="https://github.com/akudamatata/iOS-Location-Spoofer-Web" target="_blank" rel="noopener noreferrer">
+          定位工具原项目 <span>↗</span>
         </a>
       </footer>
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./public-places.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

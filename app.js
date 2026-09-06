@@ -1,4 +1,4 @@
-const cities = [
+const baseCities = [
   ["北京", "Beijing", "中国", "东亚", 39.9042, 116.4074],
   ["上海", "Shanghai", "中国", "东亚", 31.2304, 121.4737],
   ["广州", "Guangzhou", "中国", "东亚", 23.1291, 113.2644],
@@ -90,6 +90,19 @@ const cities = [
   ["拉各斯", "Lagos", "尼日利亚", "非洲", 6.5244, 3.3792]
 ].map(([name, english, country, region, lat, lng]) => ({ name, english, country, region, lat, lng }));
 
+const cities = baseCities.map((city, index) => {
+  const place = window.publicPlaces?.[city.name] || null;
+  const roomSeed = [...city.english].reduce((total, character) => total + character.charCodeAt(0), 0);
+  const exampleRoom = `DEMO-${String((roomSeed % 17) + 3).padStart(2, "0")}${String((index % 20) + 1).padStart(2, "0")}`;
+  return {
+    ...city,
+    place,
+    exampleRoom,
+    lat: place?.lat ?? city.lat,
+    lng: place?.lng ?? city.lng
+  };
+});
+
 const regionOrder = ["全部", "东亚", "东南亚", "南亚", "中东", "欧洲", "北美洲", "南美洲", "大洋洲", "非洲"];
 const searchInput = document.querySelector("#search");
 const regionContainer = document.querySelector("#regions");
@@ -104,7 +117,13 @@ let copyOrder = "latlng";
 let toastTimer;
 
 const normalize = (value) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-const formatNumber = (value) => Number(value).toFixed(4);
+const formatNumber = (value) => Number(value).toFixed(6);
+const escapeHtml = (value) => String(value).replace(/[&<>"]/g, (character) => ({
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  "\"": "&quot;"
+}[character]));
 
 function coordinates(city) {
   const lat = formatNumber(city.lat);
@@ -147,9 +166,21 @@ function filteredCities() {
   const query = normalize(searchInput.value.trim());
   return cities.filter((city) => {
     const inRegion = selectedRegion === "全部" || city.region === selectedRegion;
-    const haystack = normalize(`${city.name} ${city.english} ${city.country} ${city.region}`);
+    const haystack = normalize(`${city.name} ${city.english} ${city.country} ${city.region} ${city.place?.name || ""} ${city.place?.address || ""} ${city.place?.postcode || ""}`);
     return inRegion && (!query || haystack.includes(query));
   });
+}
+
+function locationDetails(city) {
+  const lines = [
+    `${city.name} / ${city.english}`,
+    `公开落点：${city.place?.name || "城市中心附近"}`,
+    `地址：${city.place?.address || "暂无公开地址"}`,
+    `邮编：${city.place?.postcode || "未收录"}`,
+    `示例房号：${city.exampleRoom}（虚构，不对应真实房间）`,
+    `坐标：${coordinates(city)}`
+  ];
+  return lines.join("\n");
 }
 
 function renderCities() {
@@ -158,23 +189,36 @@ function renderCities() {
   emptyState.hidden = visibleCities.length !== 0;
   cityList.hidden = visibleCities.length === 0;
   cityList.innerHTML = visibleCities.map((city) => `
-    <article class="city-card" tabindex="0" role="button" data-city="${city.name}" aria-label="复制${city.name}经纬度">
+    <article class="city-card" data-city="${escapeHtml(city.name)}">
       <div class="city-top">
         <div>
-          <h2>${city.name}</h2>
-          <div class="english">${city.english}</div>
+          <h2>${escapeHtml(city.name)}</h2>
+          <div class="english">${escapeHtml(city.english)}</div>
         </div>
-        <div class="copy-icon" aria-hidden="true">⧉</div>
+        <span class="public-badge">公开设施</span>
       </div>
-      <div class="country">${city.country} · ${city.region}</div>
+      <div class="country">${escapeHtml(city.country)} · ${escapeHtml(city.region)}</div>
+      <div class="place-name">${escapeHtml(city.place?.name || "城市中心附近")}</div>
+      <div class="address">${escapeHtml(city.place?.address || "暂无公开地址")}</div>
+      <div class="meta-row">
+        <span>邮编 ${escapeHtml(city.place?.postcode || "未收录")}</span>
+        <span title="虚构示例，不对应真实房间">示例房号 ${city.exampleRoom}</span>
+      </div>
       <div class="coords">${coordinates(city)}</div>
+      <div class="card-actions">
+        <button class="copy-button" type="button" data-action="coordinates">复制坐标</button>
+        <button class="detail-button" type="button" data-action="details">复制完整信息</button>
+        ${city.place?.source ? `<a href="${city.place.source}" target="_blank" rel="noopener noreferrer">查看来源 ↗</a>` : ""}
+      </div>
     </article>
   `).join("");
 }
 
-function copyCityFromCard(card) {
+function copyCityFromCard(card, action = "coordinates") {
   const city = cities.find((item) => item.name === card.dataset.city);
-  if (city) copyText(coordinates(city), city.name);
+  if (!city) return;
+  const text = action === "details" ? locationDetails(city) : coordinates(city);
+  copyText(text, city.name);
 }
 
 regionContainer.addEventListener("click", (event) => {
@@ -189,15 +233,8 @@ searchInput.addEventListener("input", renderCities);
 
 cityList.addEventListener("click", (event) => {
   const card = event.target.closest(".city-card");
-  if (card) copyCityFromCard(card);
-});
-
-cityList.addEventListener("keydown", (event) => {
-  if (event.key !== "Enter" && event.key !== " ") return;
-  const card = event.target.closest(".city-card");
-  if (!card) return;
-  event.preventDefault();
-  copyCityFromCard(card);
+  const button = event.target.closest("[data-action]");
+  if (card && button) copyCityFromCard(card, button.dataset.action);
 });
 
 formatButton.addEventListener("click", () => {
