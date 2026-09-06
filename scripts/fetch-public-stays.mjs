@@ -16,6 +16,73 @@ if (!cities.length) throw new Error("No cities found in app.js");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const radians = (degrees) => degrees * Math.PI / 180;
 
+const languageByCountry = {
+  "中国": "zh-CN",
+  "日本": "ja",
+  "韩国": "ko",
+  "马来西亚": "ms",
+  "新加坡": "en-SG",
+  "泰国": "th",
+  "越南": "vi",
+  "印度尼西亚": "id",
+  "菲律宾": "fil",
+  "柬埔寨": "km",
+  "老挝": "lo",
+  "缅甸": "my",
+  "印度": "en-IN",
+  "尼泊尔": "ne",
+  "阿联酋": "ar",
+  "卡塔尔": "ar",
+  "沙特阿拉伯": "ar",
+  "土耳其": "tr",
+  "以色列": "he",
+  "英国": "en-GB",
+  "法国": "fr",
+  "德国": "de",
+  "意大利": "it",
+  "西班牙": "es",
+  "荷兰": "nl",
+  "比利时": "fr",
+  "瑞士": "de",
+  "奥地利": "de",
+  "捷克": "cs",
+  "希腊": "el",
+  "丹麦": "da",
+  "瑞典": "sv",
+  "挪威": "no",
+  "芬兰": "fi",
+  "葡萄牙": "pt",
+  "爱尔兰": "en-IE",
+  "俄罗斯": "ru",
+  "美国": "en-US",
+  "加拿大": "en-CA",
+  "墨西哥": "es-MX",
+  "巴西": "pt-BR",
+  "阿根廷": "es-AR",
+  "智利": "es-CL",
+  "秘鲁": "es-PE",
+  "哥伦比亚": "es-CO",
+  "澳大利亚": "en-AU",
+  "新西兰": "en-NZ",
+  "埃及": "ar",
+  "南非": "en-ZA",
+  "肯尼亚": "sw",
+  "摩洛哥": "fr",
+  "尼日利亚": "en-NG"
+};
+
+const languageByCity = {
+  "香港": "zh-HK",
+  "澳门": "zh-MO",
+  "台北": "zh-TW",
+  "新德里": "hi",
+  "孟买": "mr",
+  "加尔各答": "bn",
+  "布鲁塞尔": "fr-BE",
+  "日内瓦": "fr-CH",
+  "蒙特利尔": "fr-CA"
+};
+
 function distanceKm(a, b) {
   const earthRadius = 6371;
   const dLat = radians(b.lat - a.lat);
@@ -57,6 +124,7 @@ function compactAddress(result) {
 
 async function fetchPlace(city) {
   const spread = city.name === "巴厘岛" ? 0.75 : 0.32;
+  const localLanguage = languageByCity[city.name] || languageByCountry[city.country] || "en";
   const params = new URLSearchParams({
     format: "jsonv2",
     addressdetails: "1",
@@ -64,7 +132,7 @@ async function fetchPlace(city) {
     q: "hotel",
     viewbox: `${city.lng - spread},${city.lat + spread},${city.lng + spread},${city.lat - spread}`,
     bounded: "1",
-    "accept-language": "zh,en"
+    "accept-language": `${localLanguage},en;q=0.65`
   });
   const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
     headers: { "User-Agent": "CityCoordinatesSite/1.0 (https://github.com/Oldleeo/city-coordinates)" }
