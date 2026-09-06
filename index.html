@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07111f" />
+    <meta
+      name="description"
+      content="搜索全球主要城市，一键复制纬度和经度。"
+    />
+    <title>全球城市经纬度</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="shell">
+      <header class="hero">
+        <div class="eyebrow">CITY COORDINATES</div>
+        <h1>全球城市经纬度</h1>
+        <p>搜索城市，点一下即可复制 <span>纬度, 经度</span></p>
+
+        <div class="search-wrap">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />
+          </svg>
+          <input
+            id="search"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            placeholder="搜索城市、国家或英文名…"
+            aria-label="搜索城市"
+          />
+          <kbd>⌘ K</kbd>
+        </div>
+
+        <div id="regions" class="regions" aria-label="地区筛选"></div>
+      </header>
+
+      <section class="toolbar">
+        <div><strong id="result-count">0</strong> 个城市</div>
+        <button id="copy-format" class="ghost-button" type="button" title="切换复制格式">
+          格式：纬度, 经度
+        </button>
+      </section>
+
+      <section id="city-list" class="city-grid" aria-live="polite"></section>
+
+      <section id="empty-state" class="empty-state" hidden>
+        <div>⌖</div>
+        <h2>没有找到这个城市</h2>
+        <p>试试城市英文名、国家名，或者清空地区筛选。</p>
+      </section>
+
+      <footer>
+        <p>坐标取城市中心点附近，适合快速测试与定位工具。</p>
+        <a href="https://ios-location-spoofer-web-aop.pages.dev/" target="_blank" rel="noopener noreferrer">
+          打开定位控制面板 <span>↗</span>
+        </a>
+      </footer>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
